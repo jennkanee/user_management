@@ -96,15 +96,26 @@ def test_user_base_nickname_invalid(nickname, user_base_data):
     with pytest.raises(ValidationError):
         UserBase(**user_base_data)
 
-# Parametrized tests for URL validation
-@pytest.mark.parametrize("url", ["http://valid.com/profile.jpg", "https://valid.com/profile.png", None])
-def test_user_base_url_valid(url, user_base_data):
+# Test cases for strict URL validation
+@pytest.mark.parametrize("url", [
+    "https://example.com/page",  # Valid URL
+    "http://www.example.com",  # Valid URL
+    "https://192.168.0.1/login",  # Valid IP URL
+])
+def test_user_base_url_strict_validation_valid(url, user_base_data):
     user_base_data["profile_picture_url"] = url
     user = UserBase(**user_base_data)
     assert user.profile_picture_url == url
 
-@pytest.mark.parametrize("url", ["ftp://invalid.com/profile.jpg", "http//invalid", "https//invalid"])
-def test_user_base_url_invalid(url, user_base_data):
+@pytest.mark.parametrize("url", [
+    "https://ex ample.com/page",  # Space in the URL
+    "httx://example.com",  # Incorrect protocol
+    "www.example.com",  # Missing protocol
+    "example.com/page",  # Missing protocol
+    "ftp://example.com/resource",  # Unsupported protocol
+    "http:///example.com",  # Typo in protocol
+])
+def test_user_base_url_strict_validation_invalid(url, user_base_data):
     user_base_data["profile_picture_url"] = url
     with pytest.raises(ValidationError):
         UserBase(**user_base_data)
