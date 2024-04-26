@@ -161,3 +161,17 @@ async def test_unlock_user_account(db_session, locked_user):
     assert unlocked, "The account should be unlocked"
     refreshed_user = await UserService.get_by_id(db_session, locked_user.id)
     assert not refreshed_user.is_locked, "The user should no longer be locked"
+
+    # Test updating multiple fields for an existing user
+async def test_update_user_multiple_fields(db_session, user):
+    updated_data = {
+        "nickname": "UpdatedNickname",
+        "bio": "Updated biography text here.",
+        "linkedin_profile_url": "https://linkedin.com/in/updatedprofile"
+    }
+    updated_user = await UserService.update(db_session, user.id, updated_data)
+    assert updated_user is not None, "The updated user should not be None"
+    assert updated_user.nickname == updated_data["nickname"], "Nickname should be updated correctly"
+    assert updated_user.bio == updated_data["bio"], "Bio should be updated correctly"
+    assert updated_user.linkedin_profile_url == updated_data["linkedin_profile_url"], "LinkedIn URL should be updated correctly"
+
