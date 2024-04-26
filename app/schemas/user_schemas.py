@@ -7,14 +7,17 @@ import uuid
 import re
 from app.models.user_model import UserRole
 from app.utils.nickname_gen import generate_nickname
+from validators import url as url_validator
 
 
 def validate_url(url: Optional[str]) -> Optional[str]:
     if url is None:
         return url
-    url_regex = r'^https?:\/\/[^\s/$.?#].[^\s]*$'
-    if not re.match(url_regex, url):
-        raise ValueError('Invalid URL format')
+    # Define allowed protocols
+    allowed_protocols = ['http', 'https']
+    # Check if URL is valid and starts with an allowed protocol
+    if not url_validator(url) or not any(url.startswith(f"{protocol}://") for protocol in allowed_protocols):
+        raise ValueError('Invalid URL format or protocol not allowed')
     return url
 
 class UserBase(BaseModel):
