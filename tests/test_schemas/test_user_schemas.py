@@ -71,6 +71,23 @@ def test_user_update_valid(user_update_data):
     assert user_update.email == user_update_data["email"]
     assert user_update.first_name == user_update_data["first_name"]
 
+def test_user_update_full(user_base_data):
+    # Prepare data with both optional and mandatory fields updated
+    update_data = {
+        "email": "new.email@example.com",
+        "nickname": "new_nickname",
+        "first_name": "NewFirstName",
+        "last_name": "NewLastName",
+        "bio": "Updated biography for testing."
+    }
+    user = UserUpdate(**{**user_base_data, **update_data})
+    assert user.email == "new.email@example.com"
+    assert user.nickname == "new_nickname"
+    assert user.first_name == "NewFirstName"
+    assert user.last_name == "NewLastName"
+    assert user.bio == "Updated biography for testing."
+
+
 # Tests for UserResponse
 def test_user_response_valid(user_response_data):
     user = UserResponse(**user_response_data)
@@ -83,7 +100,7 @@ def test_login_request_valid(login_request_data):
     assert login.email == login_request_data["email"]
     assert login.password == login_request_data["password"]
 
-# Parametrized tests for nickname and email validation
+# Parametrized tests for nickname validation
 @pytest.mark.parametrize("nickname", ["test_user", "test-user", "testuser123", "123test"])
 def test_user_base_nickname_valid(nickname, user_base_data):
     user_base_data["nickname"] = nickname
@@ -119,3 +136,10 @@ def test_user_base_url_strict_validation_invalid(url, user_base_data):
     user_base_data["profile_picture_url"] = url
     with pytest.raises(ValidationError):
         UserBase(**user_base_data)
+
+def test_login_request_invalid_email_format(user_base_data):
+    # Using an invalid email format
+    user_base_data["email"] = "invalid-email-format"
+
+    with pytest.raises(ValidationError):
+        LoginRequest(**user_base_data)
