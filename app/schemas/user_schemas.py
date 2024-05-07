@@ -29,7 +29,7 @@ class UserBase(BaseModel):
     profile_picture_url: Optional[str] = Field(None, example="https://example.com/profiles/john.jpg")
     linkedin_profile_url: Optional[str] =Field(None, example="https://linkedin.com/in/johndoe")
     github_profile_url: Optional[str] = Field(None, example="https://github.com/johndoe")
-    role: UserRole
+    role: UserRole = Field(..., example=UserRole.ADMIN.name)
 
     _validate_urls = validator('profile_picture_url', 'linkedin_profile_url', 'github_profile_url', pre=True, allow_reuse=True)(validate_url)
  
@@ -49,7 +49,7 @@ class UserUpdate(UserBase):
     profile_picture_url: Optional[str] = Field(None, example="https://example.com/profiles/john.jpg")
     linkedin_profile_url: Optional[str] =Field(None, example="https://linkedin.com/in/johndoe")
     github_profile_url: Optional[str] = Field(None, example="https://github.com/johndoe")
-    role: Optional[str] = Field(None, example="AUTHENTICATED")
+    role: Optional[UserRole] = Field(None, example=UserRole.ADMIN.name)
 
     @root_validator(pre=True)
     def check_at_least_one_value(cls, values):
@@ -69,17 +69,17 @@ class LoginRequest(BaseModel):
     password: str = Field(..., example="Secure*1234")
 
 class ErrorResponse(BaseModel):
-    error: str = Field(..., example="Not Found")
-    details: Optional[str] = Field(None, example="The requested resource was not found.")
+    error: str = Field(..., example="User Not Found")
+    details: Optional[str] = Field(None, example="The user with the given ID does not exist.")
 
 class UserListResponse(BaseModel):
     items: List[UserResponse] = Field(..., example=[{
         "id": uuid.uuid4(), "nickname": generate_nickname(), "email": "john.doe@example.com",
-        "first_name": "John", "bio": "Experienced developer", "role": "AUTHENTICATED",
-        "last_name": "Doe", "bio": "Experienced developer", "role": "AUTHENTICATED",
-        "profile_picture_url": "https://example.com/profiles/john.jpg", 
-        "linkedin_profile_url": "https://linkedin.com/in/johndoe", 
-        "github_profile_url": "https://github.com/johndoe"
+        "first_name": "John", "last_name": "Doe",
+        "profile_picture_url": "https://example.com/profiles/john.jpg",
+        "linkedin_profile_url": "https://linkedin.com/in/johndoe",
+        "github_profile_url": "https://github.com/johndoe",
+        "role": "AUTHENTICATED"
     }])
     total: int = Field(..., example=100)
     page: int = Field(..., example=1)
